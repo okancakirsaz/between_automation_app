@@ -66,7 +66,7 @@ class AddElementInputs extends StatelessWidget {
         CustomButton(
             onPressed: onPressed,
             style: TextConsts.instance.regularBlack18,
-            text: "Ekle",
+            text: "Onayla",
             width: 200,
             height: 50)
       ],

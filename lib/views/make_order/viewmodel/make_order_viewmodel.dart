@@ -33,10 +33,16 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
   @observable
   ObservableList selectedFoods = ObservableList.of([]);
+  @observable
   ObservableList orders = ObservableList.of([]);
+  bool _isStockEnought = false;
   List<DropdownMenuEntry> menuAsDropdownItem = [];
   late final List allInventory;
   late final List allMenu;
+
+  Future<void> sendJsonToCache(LocaleKeysEnums key, dynamic value) async {
+    await localeManager.setJsonData(key.name, value);
+  }
 
   getAllMenu() {
     allMenu = localeManager.getNullableJsonData(LocaleKeysEnums.menu.name);
@@ -75,10 +81,13 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
   Future<void> makeOrder() async {
     if (selectedFoods.isNotEmpty) {
-      orders.add({"order": selectedFoods, "note": note.text});
-      await localeManager.setJsonData(LocaleKeysEnums.orders.name, orders);
-      await manipulateStockDatas();
-      resetInputs();
+      manipulateStockDatas();
+      if (_isStockEnought) {
+        orders.add({"order": selectedFoods, "note": note.text});
+        await sendJsonToCache(LocaleKeysEnums.orders, orders);
+        await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
+        resetInputs();
+      }
     } else {
       Fluttertoast.showToast(
           msg: "Lütfen önce sipariş giriniz.",
@@ -86,28 +95,32 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
     }
   }
 
-  Future<void> manipulateStockDatas() async {
-    selectedFoods.forEach((element) {
-      //First getting all selected foods
-      for (int i = 0; i <= allInventory.length - 1; i++) {
-        //Second getting inventory elements
-        allMenu.forEach((menuElement) {
-          //Third getting menu element
-          final MenuItemModel menuElementAsModel =
-              MenuItemModel.fromJson(menuElement);
-          menuElementAsModel.materials!.forEach((menuMaterial) {
-            //Last getting inventory elements in menu element
-            allInventory[i]["count"] = (allInventory[i]["count"] -
-                (menuMaterial!["count"] * element["count"])) as int?;
+  manipulateStockDatas() {
+    for (var menuElement in allMenu) {
+      MenuItemModel.fromJson(menuElement).materials!.forEach((material) {
+        selectedFoods.where((selectedFoodName) {
+          if (selectedFoodName["name"] == menuElement["name"]) {
+            allInventory.where((inventoryElement) {
+              int finalValue = (material["count"] * selectedFoodName["count"]);
+              if (material["name"] == inventoryElement["name"]) {
+                if (inventoryElement["count"] < finalValue) {
+                  Fluttertoast.showToast(
+                      msg: "Yeterli stok bulunmamakta",
+                      backgroundColor: ColorConsts.instance.secondary);
+                } else {
+                  inventoryElement["count"] =
+                      inventoryElement["count"] - finalValue;
+                  _isStockEnought = true;
+                }
+              }
 
-            allInventory[i] = allInventory[i];
-          });
-        });
-      }
-    });
-
-    await localeManager.setJsonData(
-        LocaleKeysEnums.inventory.name, allInventory);
+              return true;
+            }).toList();
+          }
+          return true;
+        }).toList();
+      });
+    }
   }
 
   @action
@@ -117,6 +130,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
     selectedFoods = ObservableList.of([]);
   }
 
+  @action
   List<String> fetchOrdersToUi(int index) {
     List<String> finalResponse = [];
     orders[index]["order"].forEach((order) {
@@ -126,12 +140,24 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   @action
-  Future<void> removeOrder(int index) async {
+  Future<void> submitOrder(int index) async {
     orders.removeAt(index);
-    await localeManager.setJsonData(LocaleKeysEnums.orders.name, orders);
+    await sendJsonToCache(LocaleKeysEnums.orders, orders);
   }
 
-  Future<void> editOrder(MakeOrderViewModel viewModel, int index) async {
+  @action
+  Future<void> cancelOrder(int index) async {
+    orders[index]["order"].where((order) {
+      manipulateStockDatasForAddOrDelete(order, false);
+      return true;
+    }).toList();
+
+    orders.removeAt(index);
+    await sendJsonToCache(LocaleKeysEnums.orders, orders);
+    await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
+  }
+
+  editOrder(MakeOrderViewModel viewModel, int index) {
     showEditDialog(viewModel, index);
     getInputDatasForEdit(index);
   }
@@ -143,8 +169,15 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
           return AlertDialog(
             backgroundColor: ColorConsts.instance.secondary,
             content: SizedBox(
-                width: 1000,
-                child: MakeOrder(viewModel: viewModel, onPressed: () async {})),
+              width: 1000,
+              child: MakeOrder(
+                viewModel: viewModel,
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await updateOrder(index);
+                },
+              ),
+            ),
           );
         });
   }
@@ -156,10 +189,71 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
   @action
   Future<void> updateOrder(int index) async {
-    //TODO:Continue here
+    checkNoteEqualToOldNote(index);
+    checkStockEqualToOrder(index);
+    orders[index]["order"] = selectedFoods;
+    if (selectedFoods.isNotEmpty) {
+      await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
+      if (_isStockEnought) {
+        await sendJsonToCache(LocaleKeysEnums.orders, orders);
+        getOrders();
+      }
+    }
+  }
+
+  checkNoteEqualToOldNote(int index) {
+    String oldNote = orders[index]["note"];
     orders[index]["note"] = note.text;
-    final List<String> oldOrderList = orders[index]["order"];
-    if (oldOrderList.length > selectedFoods.length) {
-    } else if (oldOrderList.length < selectedFoods.length) {}
+    if (oldNote != orders[index]["note"]) {
+      _isStockEnought = true;
+    }
+  }
+
+  checkStockEqualToOrder(int index) {
+    final List<dynamic> oldOrderList = orders[index]["order"];
+    oldOrderList.where((element) {
+      bool isEqual = selectedFoods.contains(element);
+      if (!isEqual) {
+        //Increment
+        manipulateStockDatasForAddOrDelete(element, false);
+      }
+      return isEqual == false;
+    }).toList();
+
+    selectedFoods.where((element) {
+      bool isEqual = oldOrderList.contains(element);
+      if (!isEqual) {
+        //Decrament
+        manipulateStockDatasForAddOrDelete(element, true);
+      }
+      return isEqual == false;
+    }).toList();
+  }
+
+  manipulateStockDatasForAddOrDelete(dynamic element, bool isDecrament) {
+    for (var menuElement in allMenu) {
+      MenuItemModel.fromJson(menuElement).materials!.forEach((material) {
+        if (element["name"] == menuElement["name"]) {
+          allInventory.where((inventoryElement) {
+            int finalValue = (material["count"] * element["count"]);
+            if (material["name"] == inventoryElement["name"]) {
+              if (inventoryElement["count"] < finalValue) {
+                Fluttertoast.showToast(
+                    msg: "Yeterli stok bulunmamakta",
+                    backgroundColor: ColorConsts.instance.secondary);
+              } else {
+                inventoryElement["count"] = isDecrament
+                    ? inventoryElement["count"] -
+                        (material["count"] * element["count"])
+                    : inventoryElement["count"] +
+                        (material["count"] * element["count"]);
+                _isStockEnought = true;
+              }
+            }
+            return true;
+          }).toList();
+        }
+      });
+    }
   }
 }

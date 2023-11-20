@@ -25,6 +25,46 @@ mixin _$MakeOrderViewModel on MakeOrderViewModelBase, Store {
     });
   }
 
+  late final _$ordersAtom =
+      Atom(name: 'MakeOrderViewModelBase.orders', context: context);
+
+  @override
+  ObservableList<dynamic> get orders {
+    _$ordersAtom.reportRead();
+    return super.orders;
+  }
+
+  @override
+  set orders(ObservableList<dynamic> value) {
+    _$ordersAtom.reportWrite(value, super.orders, () {
+      super.orders = value;
+    });
+  }
+
+  late final _$submitOrderAsyncAction =
+      AsyncAction('MakeOrderViewModelBase.submitOrder', context: context);
+
+  @override
+  Future<void> submitOrder(int index) {
+    return _$submitOrderAsyncAction.run(() => super.submitOrder(index));
+  }
+
+  late final _$cancelOrderAsyncAction =
+      AsyncAction('MakeOrderViewModelBase.cancelOrder', context: context);
+
+  @override
+  Future<void> cancelOrder(int index) {
+    return _$cancelOrderAsyncAction.run(() => super.cancelOrder(index));
+  }
+
+  late final _$updateOrderAsyncAction =
+      AsyncAction('MakeOrderViewModelBase.updateOrder', context: context);
+
+  @override
+  Future<void> updateOrder(int index) {
+    return _$updateOrderAsyncAction.run(() => super.updateOrder(index));
+  }
+
   late final _$MakeOrderViewModelBaseActionController =
       ActionController(name: 'MakeOrderViewModelBase', context: context);
 
@@ -40,9 +80,43 @@ mixin _$MakeOrderViewModel on MakeOrderViewModelBase, Store {
   }
 
   @override
+  dynamic deleteSelectedFood(int index) {
+    final _$actionInfo = _$MakeOrderViewModelBaseActionController.startAction(
+        name: 'MakeOrderViewModelBase.deleteSelectedFood');
+    try {
+      return super.deleteSelectedFood(index);
+    } finally {
+      _$MakeOrderViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  dynamic resetInputs() {
+    final _$actionInfo = _$MakeOrderViewModelBaseActionController.startAction(
+        name: 'MakeOrderViewModelBase.resetInputs');
+    try {
+      return super.resetInputs();
+    } finally {
+      _$MakeOrderViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  dynamic editOrder(MakeOrderViewModel viewModel, int index) {
+    final _$actionInfo = _$MakeOrderViewModelBaseActionController.startAction(
+        name: 'MakeOrderViewModelBase.editOrder');
+    try {
+      return super.editOrder(viewModel, index);
+    } finally {
+      _$MakeOrderViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
-selectedFoods: ${selectedFoods}
+selectedFoods: ${selectedFoods},
+orders: ${orders}
     ''';
   }
 }

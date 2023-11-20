@@ -30,12 +30,29 @@ class Orders extends StatelessWidget {
                         size: 30,
                       ),
                     ),
-                    trailing: IconButton(
-                      onPressed: () async => await viewModel.removeOrder(index),
-                      icon: Icon(
-                        AssetConsts.instance.delete,
-                        color: ColorConsts.instance.red,
-                        size: 30,
+                    trailing: SizedBox(
+                      width: 100,
+                      child: Row(
+                        children: <Widget>[
+                          IconButton(
+                            onPressed: () async =>
+                                await viewModel.submitOrder(index),
+                            icon: Icon(
+                              size: 30,
+                              AssetConsts.instance.submitted,
+                              color: ColorConsts.instance.secondary,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () async =>
+                                await viewModel.cancelOrder(index),
+                            icon: Icon(
+                              AssetConsts.instance.delete,
+                              color: ColorConsts.instance.red,
+                              size: 30,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   )),

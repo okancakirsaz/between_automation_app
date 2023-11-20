@@ -9,4 +9,5 @@ class AssetConsts {
   final IconData edit = Icons.edit;
   final IconData delete = Icons.delete;
   final IconData order = Icons.people;
+  final IconData submitted = Icons.check;
 }

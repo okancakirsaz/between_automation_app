@@ -11,7 +11,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 class MenuItems extends StatelessWidget {
   final MenuViewModel viewModel;
   const MenuItems({super.key, required this.viewModel});
-
+  //TODO: you had a view bug fix it
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (context) {
