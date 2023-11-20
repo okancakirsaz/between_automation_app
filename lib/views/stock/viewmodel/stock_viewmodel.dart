@@ -12,7 +12,6 @@ part 'stock_viewmodel.g.dart';
 
 class StockViewModel = _StockViewModelBase with _$StockViewModel;
 
-//TODO !!!IMPORTANT!!!:If element count is 0 delete this element in list
 abstract class _StockViewModelBase with Store, BaseViewModel {
   @override
   void setContext(BuildContext context) => viewModelContext = context;
@@ -25,6 +24,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
     mostPopulars = localeManager
             .getNullableJsonData(LocaleKeysEnums.mostPopularItems.name) ??
         [];
+    await checkIsInventoryElementExist();
     await fetchMostPopulars();
   }
 
@@ -186,5 +186,18 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
     await localeManager.removeData(LocaleKeysEnums.inventory.name);
     await localeManager.setJsonData(
         LocaleKeysEnums.inventory.name, currentInventory);
+  }
+
+  @action
+  Future<void> checkIsInventoryElementExist() async {
+    for (int i = 0; i <= currentInventory.length - 1; i++) {
+      InventoryElementModel elementAsModel =
+          InventoryElementModel.fromJson(currentInventory[i]);
+      if (elementAsModel.count! <= 0) {
+        currentInventory.removeAt(i);
+        await localeManager.setJsonData(
+            LocaleKeysEnums.inventory.name, currentInventory);
+      }
+    }
   }
 }

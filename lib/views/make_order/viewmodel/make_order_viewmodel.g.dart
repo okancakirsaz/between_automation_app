@@ -102,11 +102,11 @@ mixin _$MakeOrderViewModel on MakeOrderViewModelBase, Store {
   }
 
   @override
-  dynamic editOrder(MakeOrderViewModel viewModel, int index) {
+  List<String> fetchOrdersToUi(int index) {
     final _$actionInfo = _$MakeOrderViewModelBaseActionController.startAction(
-        name: 'MakeOrderViewModelBase.editOrder');
+        name: 'MakeOrderViewModelBase.fetchOrdersToUi');
     try {
-      return super.editOrder(viewModel, index);
+      return super.fetchOrdersToUi(index);
     } finally {
       _$MakeOrderViewModelBaseActionController.endAction(_$actionInfo);
     }

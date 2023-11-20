@@ -49,6 +49,16 @@ mixin _$StockViewModel on _StockViewModelBase, Store {
     return _$deleteElementAsyncAction.run(() => super.deleteElement(index));
   }
 
+  late final _$checkIsInventoryElementExistAsyncAction = AsyncAction(
+      '_StockViewModelBase.checkIsInventoryElementExist',
+      context: context);
+
+  @override
+  Future<void> checkIsInventoryElementExist() {
+    return _$checkIsInventoryElementExistAsyncAction
+        .run(() => super.checkIsInventoryElementExist());
+  }
+
   @override
   String toString() {
     return '''
