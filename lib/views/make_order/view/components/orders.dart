@@ -27,7 +27,7 @@ class Orders extends StatelessWidget {
                           style: TextConsts.instance.regularBlack18Bold,
                         ),
                         subtitle: Text(
-                          viewModel.orders[index]["note"],
+                          "${viewModel.orders[index]["note"]} Toplam Ücret: ${viewModel.orders[index]["cost"]}₺",
                           style: TextConsts.instance.regularBlack14,
                         ),
                         leading: IconButton(
@@ -39,9 +39,17 @@ class Orders extends StatelessWidget {
                           ),
                         ),
                         trailing: SizedBox(
-                          width: 100,
+                          width: 150,
                           child: Row(
                             children: <Widget>[
+                              IconButton(
+                                onPressed: () =>
+                                    viewModel.navigateToPrintView(index),
+                                icon: Icon(
+                                  size: 30,
+                                  AssetConsts.instance.print,
+                                ),
+                              ),
                               IconButton(
                                 onPressed: () async =>
                                     await viewModel.submitOrder(index),

@@ -1,4 +1,5 @@
 import 'package:between_automation/views/authantication/core/models/user_data_model.dart';
+import 'package:flutter/material.dart';
 
 class LoginMockServices {
   UserDataModel? getUserData(String mail, String password) {
@@ -7,7 +8,7 @@ class LoginMockServices {
       for (int i = 0; i <= dataSet.length - 1; i++) {
         if (mail == dataSet[i]["e_mail"] &&
             password == dataSet[i]["password"]) {
-          print(dataSet);
+          debugPrint(dataSet.toString());
           calledUser = dataSet[i];
         }
       }

@@ -4,6 +4,8 @@ import 'package:between_automation/core/consts/color_consts/color_consts.dart';
 import 'package:between_automation/core/init/cache/local_keys_enums.dart';
 import 'package:between_automation/views/make_order/view/make_order_view.dart';
 import 'package:between_automation/views/menu/models/menu_item_model.dart';
+import 'package:between_automation/views/print/view/print_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
@@ -82,8 +84,13 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   Future<void> makeOrder() async {
     if (selectedFoods.isNotEmpty) {
       manipulateStockDatas();
+
       if (_isStockEnought) {
-        orders.add({"order": selectedFoods, "note": note.text});
+        orders.add({
+          "order": selectedFoods,
+          "note": note.text,
+          "cost": getTotalCost()
+        });
         await sendJsonToCache(LocaleKeysEnums.orders, orders);
         await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
         resetInputs();
@@ -93,6 +100,18 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
           msg: "Lütfen önce sipariş giriniz.",
           backgroundColor: ColorConsts.instance.secondary);
     }
+  }
+
+  int getTotalCost() {
+    List<int> costList = [];
+    for (var element in allMenu) {
+      for (var selectedElement in selectedFoods) {
+        if (selectedElement["name"] == element["name"]) {
+          costList.add(element["price"] * selectedElement["count"]);
+        }
+      }
+    }
+    return costList.reduce((a, b) => a + b);
   }
 
   manipulateStockDatas() {
@@ -191,6 +210,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   Future<void> updateOrder(int index) async {
     checkNoteEqualToOldNote(index);
     checkStockEqualToOrder(index);
+    orders[index]["cost"] = getTotalCost();
     orders[index]["order"] = selectedFoods;
     if (selectedFoods.isNotEmpty) {
       await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
@@ -255,5 +275,12 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
         }
       });
     }
+  }
+
+  navigateToPrintView(int index) {
+    Navigator.push(
+        viewModelContext,
+        CupertinoPageRoute(
+            builder: (context) => PrintView(data: orders[index])));
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:between_automation/core/consts/color_consts/color_consts.dart';
 import 'package:between_automation/core/init/cache/local_keys_enums.dart';
 import 'package:between_automation/views/stock/models/inventory_element_model.dart';

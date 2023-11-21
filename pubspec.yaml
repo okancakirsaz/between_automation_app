@@ -34,6 +34,8 @@ dependencies:
   #File
   shared_preferences: ^2.2.1
   image_picker: ^1.0.4
+  printing: ^5.11.0
+  pdf: ^3.10.6
 
   #Others
   

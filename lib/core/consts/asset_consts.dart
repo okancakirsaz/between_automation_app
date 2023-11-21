@@ -10,4 +10,5 @@ class AssetConsts {
   final IconData delete = Icons.delete;
   final IconData order = Icons.people;
   final IconData submitted = Icons.check;
+  final IconData print = Icons.print;
 }
