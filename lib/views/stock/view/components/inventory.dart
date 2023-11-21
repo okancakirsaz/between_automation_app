@@ -8,8 +8,7 @@ class Inventory extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        const SizedBox(height: 30),
-        Text("Ürünler", style: TextConsts.instance.regularBlack36Bold),
+        const SizedBox(height: 15),
         Expanded(
             child: viewModel.currentInventory.isNotEmpty
                 ? Observer(builder: (context) {

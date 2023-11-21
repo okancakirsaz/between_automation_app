@@ -33,6 +33,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   @observable
   ObservableList currentInventory = ObservableList.of([]);
   List mostPopulars = [];
+  final PageController pageController = PageController();
   final TextEditingController elementName = TextEditingController();
   final TextEditingController elementCost = TextEditingController();
   final TextEditingController elementUnit = TextEditingController();
@@ -201,5 +202,9 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
             LocaleKeysEnums.inventory.name, currentInventory);
       }
     }
+  }
+
+  navigateToIndexedPage(int index) {
+    pageController.jumpToPage(index);
   }
 }

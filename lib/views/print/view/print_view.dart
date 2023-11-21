@@ -1,7 +1,9 @@
 import 'package:between_automation/core/base/view/base_view.dart';
 import 'package:between_automation/core/consts/color_consts/color_consts.dart';
 import 'package:between_automation/core/consts/radius_consts.dart';
+import 'package:between_automation/core/widgets/custom_app_bar/custom_app_bar.dart';
 import 'package:between_automation/core/widgets/custom_scaffold.dart';
+import 'package:between_automation/core/widgets/logo.dart';
 import 'package:between_automation/views/print/viewmodel/print_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -18,6 +20,7 @@ class PrintView extends StatelessWidget {
       viewModel: PrintViewModel(),
       onPageBuilder: (context, model) {
         return CustomScaffold(
+          appBar: CustomAppBar(title: const Logo()).build(),
           body: Column(
             children: <Widget>[
               Expanded(

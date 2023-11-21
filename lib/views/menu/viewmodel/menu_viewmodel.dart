@@ -33,6 +33,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
 
   @observable
   Uint8List? pickedPhoto;
+  final PageController pageController = PageController();
   final TextEditingController materialCount = TextEditingController();
   final TextEditingController elementName = TextEditingController();
   final TextEditingController elementPrice = TextEditingController();
@@ -206,5 +207,9 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
           "${elementAsModel.name} ${elementAsModel.count}/${elementAsModel.unit}");
     });
     return finalResponse;
+  }
+
+  navigateToIndexedPage(int index) {
+    pageController.jumpToPage(index);
   }
 }

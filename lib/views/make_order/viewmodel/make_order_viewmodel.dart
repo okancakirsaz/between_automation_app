@@ -32,7 +32,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   final TextEditingController selectedFood = TextEditingController();
   final TextEditingController selectedFoodCount =
       TextEditingController(text: "1");
-
+  final PageController pageController = PageController();
   @observable
   ObservableList selectedFoods = ObservableList.of([]);
   @observable
@@ -282,5 +282,9 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
         viewModelContext,
         CupertinoPageRoute(
             builder: (context) => PrintView(data: orders[index])));
+  }
+
+  navigateToIndexedPage(int index) {
+    pageController.jumpToPage(index);
   }
 }
