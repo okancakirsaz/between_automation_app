@@ -20,28 +20,26 @@ class AddMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: PaddingConsts.instance.bottom50,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                buildAddDefaultElement(),
-                buildAddMaterialContainer()
-              ],
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: PaddingConsts.instance.bottom50,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              buildAddDefaultElement(),
+              buildAddMaterialContainer()
+            ],
           ),
-          CustomButton(
-              onPressed: onPressed,
-              style: TextConsts.instance.regularBlack18,
-              text: "Onayla",
-              width: 300,
-              height: 50),
-        ],
-      ),
+        ),
+        CustomButton(
+            onPressed: onPressed,
+            style: TextConsts.instance.regularBlack18,
+            text: "Onayla",
+            width: 300,
+            height: 50),
+      ],
     );
   }
 
@@ -54,7 +52,7 @@ class AddMenuItem extends StatelessWidget {
           "Menüye Element Ekle",
           style: TextConsts.instance.regularBlack20Bold,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         Padding(
           padding: PaddingConsts.instance.bottom40,
           child: buildTextField(viewModel.elementName, "Element Adı"),
@@ -87,11 +85,10 @@ class AddMenuItem extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: PaddingConsts.instance.bottom40,
+          padding: PaddingConsts.instance.bottom50,
           child: buildTextField(viewModel.elementPrice, "Element Ücreti",
               type: TextInputType.number),
         ),
-        const SizedBox(height: 50),
       ],
     );
   }
@@ -105,7 +102,7 @@ class AddMenuItem extends StatelessWidget {
           "Kullanılan Malzemeler",
           style: TextConsts.instance.regularBlack20Bold,
         ),
-        const SizedBox(height: 60),
+        const SizedBox(height: 30),
         Padding(
           padding: PaddingConsts.instance.bottom40,
           child: SizedBox(

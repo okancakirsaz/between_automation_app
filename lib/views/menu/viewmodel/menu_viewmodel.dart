@@ -59,6 +59,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     menu.forEach(
       (element) {
         menuAsModel.add(MenuItemModel.fromJson(element));
+        print(element["name"]);
       },
     );
   }
@@ -136,8 +137,13 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
         img: pickedPhoto,
         materials: selectedMaterials.toList(),
       ).toJson());
+      menuAsModel.add(MenuItemModel(
+        name: elementName.text,
+        price: int.parse(elementPrice.text),
+        img: pickedPhoto,
+        materials: selectedMaterials.toList(),
+      ));
       await localeManager.setJsonData(LocaleKeysEnums.menu.name, menu);
-      convertModelToMenu();
     } else {
       Fluttertoast.showToast(
           msg: "Eksik bilgi girdiniz, tekrar deneyiniz.",
