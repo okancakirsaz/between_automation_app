@@ -20,29 +20,28 @@ class AddMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Padding(
-          padding: PaddingConsts.instance.bottom50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              buildAddDefaultElement(),
-              buildAddMaterialContainer()
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: PaddingConsts.instance.bottom50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                buildAddDefaultElement(),
+                buildAddMaterialContainer()
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: PaddingConsts.instance.bottom40,
-          child: CustomButton(
+          CustomButton(
               onPressed: onPressed,
               style: TextConsts.instance.regularBlack18,
               text: "Onayla",
               width: 300,
               height: 50),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -92,7 +91,7 @@ class AddMenuItem extends StatelessWidget {
           child: buildTextField(viewModel.elementPrice, "Element Ücreti",
               type: TextInputType.number),
         ),
-        const SizedBox(height: 100),
+        const SizedBox(height: 50),
       ],
     );
   }

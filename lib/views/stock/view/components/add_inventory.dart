@@ -6,9 +6,11 @@ class AddInventory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[buildAddContainer(), buildMostPopular(context)],
+    return SingleChildScrollView(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[buildAddContainer(), buildMostPopular(context)],
+      ),
     );
   }
 
