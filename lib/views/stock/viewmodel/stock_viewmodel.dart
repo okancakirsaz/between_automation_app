@@ -5,10 +5,10 @@ import 'package:between_automation/core/init/cache/local_keys_enums.dart';
 import 'package:between_automation/views/stock/models/inventory_element_model.dart';
 import 'package:between_automation/views/stock/view/stock_view.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../../core/base/viewmodel/base_viewmodel.dart';
+import '../../../core/widgets/error_dialog.dart';
 
 part 'stock_viewmodel.g.dart';
 
@@ -62,14 +62,12 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
             LocaleKeysEnums.inventory.name, currentInventory);
         resetAllControllers();
       } else {
-        Fluttertoast.showToast(
-            msg: "Eksik bilgi girdiniz, tekrar deneyiniz.",
-            backgroundColor: ColorConsts.instance.secondary);
+        showErrorDialog("Eksik bilgi girdiniz, tekrar deneyiniz.");
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Bir sorun oluştu, lütfen tekrar deneyiniz",
-          backgroundColor: ColorConsts.instance.primary);
+      showErrorDialog(
+        "Bir sorun oluştu, lütfen tekrar deneyiniz",
+      );
     }
   }
 
@@ -206,5 +204,11 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
 
   navigateToIndexedPage(int index) {
     pageController.jumpToPage(index);
+  }
+
+  showErrorDialog(String reason) {
+    showDialog(
+        context: viewModelContext,
+        builder: (context) => ErrorDialog(reason: reason));
   }
 }

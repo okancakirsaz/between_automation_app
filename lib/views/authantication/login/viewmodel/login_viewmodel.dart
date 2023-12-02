@@ -1,5 +1,5 @@
+import 'package:between_automation/core/widgets/error_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
 import 'package:between_automation/core/init/cache/local_keys_enums.dart';
 import 'package:between_automation/core/init/navigation/navigation_enums.dart';
@@ -56,7 +56,9 @@ abstract class _LoginViewModelBase with Store, BaseViewModel {
   }
 
   showErrorDialog(String reason) {
-    Fluttertoast.showToast(msg: reason);
+    showDialog(
+        context: viewModelContext,
+        builder: (context) => ErrorDialog(reason: reason));
   }
 
   navigateToMainPage() {

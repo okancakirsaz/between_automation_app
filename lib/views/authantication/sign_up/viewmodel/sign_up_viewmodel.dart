@@ -1,11 +1,11 @@
 // ignore_for_file: unnecessary_null_comparison
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:between_automation/views/authantication/core/models/user_data_model.dart';
 import 'package:mobx/mobx.dart';
 import '../../../../core/base/viewmodel/base_viewmodel.dart';
 import '../../../../core/service/mock_services/sign_up_mock_services.dart';
+import '../../../../core/widgets/error_dialog.dart';
 import '../../login/viewmodel/login_viewmodel.dart';
 
 part 'sign_up_viewmodel.g.dart';
@@ -28,7 +28,9 @@ abstract class _SignUpViewModelBase with Store, BaseViewModel {
   final LoginViewModel loginViewModel = LoginViewModel();
 
   showErrorDialog(String reason) {
-    Fluttertoast.showToast(msg: reason);
+    showDialog(
+        context: viewModelContext,
+        builder: (context) => ErrorDialog(reason: reason));
   }
 
   Future<void> createMembership() async {

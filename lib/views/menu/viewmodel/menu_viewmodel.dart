@@ -8,10 +8,10 @@ import 'package:between_automation/views/menu/models/menu_item_model.dart';
 import 'package:between_automation/views/menu/view/components/add_menu_item.dart';
 import 'package:between_automation/views/stock/models/inventory_element_model.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/base/viewmodel/base_viewmodel.dart';
+import '../../../core/widgets/error_dialog.dart';
 
 part 'menu_viewmodel.g.dart';
 
@@ -48,10 +48,8 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
 
   checkInventory() {
     if (allInventory.isEmpty) {
-      Fluttertoast.showToast(
-          gravity: ToastGravity.CENTER,
-          msg: "Menü oluşturabilmek için önce stok bilgilerinizi girmelisiniz.",
-          backgroundColor: ColorConsts.instance.secondary);
+      showErrorDialog(
+          "Menü oluşturabilmek için önce stok bilgilerinizi girmelisiniz.");
     }
   }
 
@@ -59,7 +57,6 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     menu.forEach(
       (element) {
         menuAsModel.add(MenuItemModel.fromJson(element));
-        print(element["name"]);
       },
     );
   }
@@ -97,9 +94,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
             .toJson(),
       );
     } else {
-      Fluttertoast.showToast(
-          msg: "Eksik bilgi girdiniz, tekrar deneyiniz.",
-          backgroundColor: ColorConsts.instance.secondary);
+      showErrorDialog("Eksik bilgi girdiniz, tekrar deneyiniz.");
     }
   }
 
@@ -145,9 +140,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
       ));
       await localeManager.setJsonData(LocaleKeysEnums.menu.name, menu);
     } else {
-      Fluttertoast.showToast(
-          msg: "Eksik bilgi girdiniz, tekrar deneyiniz.",
-          backgroundColor: ColorConsts.instance.secondary);
+      showErrorDialog("Eksik bilgi girdiniz, tekrar deneyiniz.");
     }
   }
 
@@ -217,5 +210,11 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
 
   navigateToIndexedPage(int index) {
     pageController.jumpToPage(index);
+  }
+
+  showErrorDialog(String reason) {
+    showDialog(
+        context: viewModelContext,
+        builder: (context) => ErrorDialog(reason: reason));
   }
 }

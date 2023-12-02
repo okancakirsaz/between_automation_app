@@ -7,10 +7,10 @@ import 'package:between_automation/views/menu/models/menu_item_model.dart';
 import 'package:between_automation/views/print/view/print_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../../core/base/viewmodel/base_viewmodel.dart';
+import '../../../core/widgets/error_dialog.dart';
 
 part 'make_order_viewmodel.g.dart';
 
@@ -96,9 +96,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
         resetInputs();
       }
     } else {
-      Fluttertoast.showToast(
-          msg: "Lütfen önce sipariş giriniz.",
-          backgroundColor: ColorConsts.instance.secondary);
+      showErrorDialog("Lütfen önce sipariş giriniz.");
     }
   }
 
@@ -123,9 +121,9 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
               int finalValue = (material["count"] * selectedFoodName["count"]);
               if (material["name"] == inventoryElement["name"]) {
                 if (inventoryElement["count"] < finalValue) {
-                  Fluttertoast.showToast(
-                      msg: "Yeterli stok bulunmamakta",
-                      backgroundColor: ColorConsts.instance.secondary);
+                  showErrorDialog(
+                    "Yeterli stok bulunmamakta",
+                  );
                 } else {
                   inventoryElement["count"] =
                       inventoryElement["count"] - finalValue;
@@ -258,9 +256,9 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
             int finalValue = (material["count"] * element["count"]);
             if (material["name"] == inventoryElement["name"]) {
               if (inventoryElement["count"] < finalValue) {
-                Fluttertoast.showToast(
-                    msg: "Yeterli stok bulunmamakta",
-                    backgroundColor: ColorConsts.instance.secondary);
+                showErrorDialog(
+                  "Yeterli stok bulunmamakta",
+                );
               } else {
                 inventoryElement["count"] = isDecrament
                     ? inventoryElement["count"] -
@@ -286,5 +284,11 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
   navigateToIndexedPage(int index) {
     pageController.jumpToPage(index);
+  }
+
+  showErrorDialog(String reason) {
+    showDialog(
+        context: viewModelContext,
+        builder: (context) => ErrorDialog(reason: reason));
   }
 }

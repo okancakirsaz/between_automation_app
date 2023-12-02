@@ -6,9 +6,10 @@ import 'package:between_automation/core/widgets/custom_scaffold.dart';
 import 'package:between_automation/core/widgets/logo.dart';
 import 'package:between_automation/views/print/viewmodel/print_viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
+
+import '../../../core/widgets/error_dialog.dart';
 
 class PrintView extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -29,9 +30,8 @@ class PrintView extends StatelessWidget {
                     loadingWidget: const CircularProgressIndicator(),
                     useActions: true,
                     pdfFileName: "${model.getCurrentDate()}/Adisyon Fişi",
-                    onPrintError: (context, error) => Fluttertoast.showToast(
-                        msg: "Bir sorun oluştu. Tekrar deneyiniz.",
-                        backgroundColor: ColorConsts.instance.secondary),
+                    onPrintError: (context, error) => showErrorDialog(
+                        "Bir sorun oluştu. Tekrar deneyiniz.", context),
                     pdfPreviewPageDecoration: BoxDecoration(
                         borderRadius: RadiusConsts.instance.circularAll10,
                         color: ColorConsts.instance.lightGray,
@@ -57,5 +57,10 @@ class PrintView extends StatelessWidget {
       },
       onDispose: () {},
     );
+  }
+
+  showErrorDialog(String reason, BuildContext context) {
+    showDialog(
+        context: context, builder: (context) => ErrorDialog(reason: reason));
   }
 }
