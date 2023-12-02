@@ -24,7 +24,6 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   void init() {
     allInventory =
         localeManager.getNullableJsonData(LocaleKeysEnums.inventory.name) ?? [];
-    checkInventory();
     menu = ObservableList.of(
         localeManager.getNullableJsonData(LocaleKeysEnums.menu.name) ?? []);
     convertModelToMenu();
@@ -139,6 +138,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
         materials: selectedMaterials.toList(),
       ));
       await localeManager.setJsonData(LocaleKeysEnums.menu.name, menu);
+      resetInputs();
     } else {
       showErrorDialog("Eksik bilgi girdiniz, tekrar deneyiniz.");
     }
@@ -216,5 +216,12 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     showDialog(
         context: viewModelContext,
         builder: (context) => ErrorDialog(reason: reason));
+  }
+
+  resetInputs() {
+    materialCount.text = "";
+    elementName.text = "";
+    elementPrice.text = "";
+    selectedMaterials = ObservableList.of([]);
   }
 }
