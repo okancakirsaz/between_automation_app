@@ -22,8 +22,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   void setContext(BuildContext context) => viewModelContext = context;
   @override
   void init() {
-    allInventory =
-        localeManager.getNullableJsonData(LocaleKeysEnums.inventory.name) ?? [];
+    getAllInventory();
     menu = ObservableList.of(
         localeManager.getNullableJsonData(LocaleKeysEnums.menu.name) ?? []);
     convertModelToMenu();
@@ -52,7 +51,18 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     }
   }
 
+  getAllInventory() {
+    try {
+      allInventory =
+          localeManager.getNullableJsonData(LocaleKeysEnums.inventory.name) ??
+              [];
+    } catch (e) {
+      debugPrint("error");
+    }
+  }
+
   convertModelToMenu() {
+    //TODO: optimize
     menu.forEach(
       (element) {
         menuAsModel.add(MenuItemModel.fromJson(element));
@@ -61,16 +71,20 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   }
 
   getInventoryDataAsItem() {
+    //TODO: optimize
     for (int i = 0; i <= allInventory.length - 1; i++) {
       final InventoryElementModel allInventoryAsModel =
           InventoryElementModel.fromJson(allInventory[i]);
-      dropdownMenuItems.add(DropdownMenuEntry(
-          value: "${allInventoryAsModel.name}",
-          label: allInventoryAsModel.name!));
+      dropdownMenuItems.add(
+        DropdownMenuEntry(
+            value: "${allInventoryAsModel.name}",
+            label: allInventoryAsModel.name!),
+      );
     }
   }
 
   String findUnitForSelectedMaterial() {
+    //TODO: optimize
     String response = "";
     for (int i = 0; i <= allInventory.length - 1; i++) {
       final InventoryElementModel allInventoryAsModel =
@@ -116,7 +130,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     if (elementName.text == "" ||
         elementPrice.text == "" ||
         pickedPhoto == null ||
-        selectedMaterials == []) {
+        selectedMaterials.isEmpty) {
       return false;
     } else {
       return true;
@@ -125,6 +139,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
 
   Future<void> getFinalValues() async {
     if (addElementValidation()) {
+      //TODO: optimize
       menu.add(MenuItemModel(
         name: elementName.text,
         price: int.parse(elementPrice.text),

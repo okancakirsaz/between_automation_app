@@ -85,6 +85,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
 
   int checkPrefferedCount(String elementName, String elementUnit,
       String elementCurrency, int elementCost, int elementCount) {
+    //TODO: optimize
     int finalValue = 0;
     for (int i = 0; i <= currentInventory.length - 1; i++) {
       final InventoryElementModel asModel =
@@ -101,6 +102,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   }
 
   fetchMostPopulars() async {
+    //TODO: optimize
     for (int i = 0; i <= currentInventory.length - 1; i++) {
       final InventoryElementModel asModel =
           InventoryElementModel.fromJson(currentInventory[i]);
@@ -191,6 +193,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
 
   @action
   Future<void> checkIsInventoryElementExist() async {
+    //TODO: optimize
     for (int i = 0; i <= currentInventory.length - 1; i++) {
       InventoryElementModel elementAsModel =
           InventoryElementModel.fromJson(currentInventory[i]);

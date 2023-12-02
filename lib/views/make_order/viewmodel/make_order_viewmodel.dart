@@ -61,6 +61,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   fetchMenuAsDropdownEntry() {
+    //TODO: optimize
     allMenu.forEach((element) {
       final MenuItemModel elementAsModel = MenuItemModel.fromJson(element);
       menuAsDropdownItem.add(DropdownMenuEntry(
@@ -101,6 +102,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   int getTotalCost() {
+    //TODO: optimize
     List<int> costList = [];
     for (var element in allMenu) {
       for (var selectedElement in selectedFoods) {
@@ -113,6 +115,8 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   manipulateStockDatas() {
+    //TODO: optimize
+    isInventoryEmpty();
     for (var menuElement in allMenu) {
       MenuItemModel.fromJson(menuElement).materials!.forEach((material) {
         selectedFoods.where((selectedFoodName) {
@@ -249,6 +253,8 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   manipulateStockDatasForAddOrDelete(dynamic element, bool isDecrament) {
+    //TODO: optimize
+    isInventoryEmpty();
     for (var menuElement in allMenu) {
       MenuItemModel.fromJson(menuElement).materials!.forEach((material) {
         if (element["name"] == menuElement["name"]) {
@@ -272,6 +278,15 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
           }).toList();
         }
       });
+    }
+  }
+
+  isInventoryEmpty() {
+    if (allInventory.isEmpty) {
+      showErrorDialog(
+        "Yeterli stok bulunmamakta",
+      );
+      return;
     }
   }
 
