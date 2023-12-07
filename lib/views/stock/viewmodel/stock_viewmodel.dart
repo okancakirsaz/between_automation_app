@@ -206,7 +206,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   }
 
   @action
-  deleteElement(int index) async {
+  deleteElement(int index) {
     localeSqlManager.deleteValue(
         "stock", "name", currentInventory[index]["name"]);
     initCurrentInventory();

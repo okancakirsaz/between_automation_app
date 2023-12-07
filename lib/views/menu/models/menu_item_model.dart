@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class MenuItemModel {
   String? name;
   List<int>? img;
@@ -38,7 +40,9 @@ class MenuItemModel {
     return MenuItemModel(
       name: json['name'] as String?,
       img: (json['img'] as List<dynamic>?)?.map((e) => e as int).toList(),
-      materials: (json['materials'] as List<dynamic>?)?.map((e) => e).toList(),
+      materials: (jsonDecode(json['materials']) as List<dynamic>?)
+          ?.map((e) => e)
+          .toList(),
       price: json['price'] as int?,
     );
   }

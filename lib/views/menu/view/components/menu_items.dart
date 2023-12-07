@@ -20,12 +20,12 @@ class MenuItems extends StatelessWidget {
           : GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, childAspectRatio: 0.9),
-              itemCount: viewModel.menuAsModel.length,
+              itemCount: viewModel.menu.length,
               itemBuilder: (context, index) {
                 return MenuItem(
                   index: index,
                   viewModel: viewModel,
-                  data: viewModel.menuAsModel[index],
+                  data: viewModel.menu[index],
                 );
               });
     });

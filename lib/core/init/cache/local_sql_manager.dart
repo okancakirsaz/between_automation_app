@@ -31,15 +31,9 @@ class LocaleSqlManager {
 
     _instance.execute('''CREATE TABLE menu(
       name TEXT,
-      img INTEGER ARRAY,
+      img BLOB,
       materials TEXT,
       price INTEGER
-    )''');
-
-    _instance.execute('''CREATE TABLE orders(
-      order TEXT,
-      cost INTEGER,
-      note TEXT
     )''');
   }
 

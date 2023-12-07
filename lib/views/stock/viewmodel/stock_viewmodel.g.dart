@@ -33,14 +33,6 @@ mixin _$StockViewModel on _StockViewModelBase, Store {
     return _$fetchInventoryAsyncAction.run(() => super.fetchInventory());
   }
 
-  late final _$deleteElementAsyncAction =
-      AsyncAction('_StockViewModelBase.deleteElement', context: context);
-
-  @override
-  Future deleteElement(int index) {
-    return _$deleteElementAsyncAction.run(() => super.deleteElement(index));
-  }
-
   late final _$checkIsInventoryElementExistAsyncAction = AsyncAction(
       '_StockViewModelBase.checkIsInventoryElementExist',
       context: context);
@@ -60,6 +52,17 @@ mixin _$StockViewModel on _StockViewModelBase, Store {
         name: '_StockViewModelBase.editElement');
     try {
       return super.editElement(index);
+    } finally {
+      _$_StockViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  dynamic deleteElement(int index) {
+    final _$actionInfo = _$_StockViewModelBaseActionController.startAction(
+        name: '_StockViewModelBase.deleteElement');
+    try {
+      return super.deleteElement(index);
     } finally {
       _$_StockViewModelBaseActionController.endAction(_$actionInfo);
     }
