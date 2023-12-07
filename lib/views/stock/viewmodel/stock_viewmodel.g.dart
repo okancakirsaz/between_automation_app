@@ -33,14 +33,6 @@ mixin _$StockViewModel on _StockViewModelBase, Store {
     return _$fetchInventoryAsyncAction.run(() => super.fetchInventory());
   }
 
-  late final _$editElementAsyncAction =
-      AsyncAction('_StockViewModelBase.editElement', context: context);
-
-  @override
-  Future editElement(int index) {
-    return _$editElementAsyncAction.run(() => super.editElement(index));
-  }
-
   late final _$deleteElementAsyncAction =
       AsyncAction('_StockViewModelBase.deleteElement', context: context);
 
@@ -57,6 +49,20 @@ mixin _$StockViewModel on _StockViewModelBase, Store {
   Future<void> checkIsInventoryElementExist() {
     return _$checkIsInventoryElementExistAsyncAction
         .run(() => super.checkIsInventoryElementExist());
+  }
+
+  late final _$_StockViewModelBaseActionController =
+      ActionController(name: '_StockViewModelBase', context: context);
+
+  @override
+  dynamic editElement(int index) {
+    final _$actionInfo = _$_StockViewModelBaseActionController.startAction(
+        name: '_StockViewModelBase.editElement');
+    try {
+      return super.editElement(index);
+    } finally {
+      _$_StockViewModelBaseActionController.endAction(_$actionInfo);
+    }
   }
 
   @override

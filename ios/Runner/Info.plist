@@ -45,6 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSPhotoLibraryUsageDescription</key> <string>Photo Library Access Warning</string>
+	<key>NSPhotoLibraryUsageDescription</key> 
+	<string>Photo Library Access Warning</string>
+
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Your app needs access to the Documents folder to store data.</string>
 </dict>
 </plist>

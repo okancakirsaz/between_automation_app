@@ -20,9 +20,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
 
   @override
   Future<void> init() async {
-    currentInventory = ObservableList.of(
-        localeManager.getNullableJsonData(LocaleKeysEnums.inventory.name) ??
-            []);
+    initCurrentInventory();
     mostPopulars = localeManager
             .getNullableJsonData(LocaleKeysEnums.mostPopularItems.name) ??
         [];
@@ -33,6 +31,14 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   @observable
   ObservableList currentInventory = ObservableList.of([]);
   List mostPopulars = [];
+  final List<String> sqlKeys = [
+    "name",
+    "cost",
+    "unit",
+    "currency",
+    "count",
+    "prefferedCount"
+  ];
   final PageController pageController = PageController();
   final TextEditingController elementName = TextEditingController();
   final TextEditingController elementCost = TextEditingController();
@@ -44,22 +50,8 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   Future<void> fetchInventory() async {
     try {
       if (validate()) {
-        currentInventory.add(InventoryElementModel(
-          name: elementName.text,
-          cost: int.parse(elementCost.text),
-          unit: elementUnit.text,
-          currency: elementCurrency.text,
-          count: int.parse(elementCount.text),
-          prefferedCount: checkPrefferedCount(
-            elementName.text,
-            elementUnit.text,
-            elementCurrency.text,
-            int.parse(elementCost.text),
-            int.parse(elementCount.text),
-          ),
-        ).toJson());
-        await localeManager.setJsonData(
-            LocaleKeysEnums.inventory.name, currentInventory);
+        setInputValuesToDb();
+        initCurrentInventory();
         resetAllControllers();
       } else {
         showErrorDialog("Eksik bilgi girdiniz, tekrar deneyiniz.");
@@ -69,6 +61,28 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
         "Bir sorun oluştu, lütfen tekrar deneyiniz",
       );
     }
+  }
+
+  setInputValuesToDb() {
+    localeSqlManager.setValue(tableName: "stock", keys: sqlKeys, values: [
+      elementName.text,
+      int.parse(elementCost.text),
+      elementUnit.text,
+      elementCurrency.text,
+      int.parse(elementCount.text),
+      checkPrefferedCount(
+        elementName.text,
+        elementUnit.text,
+        elementCurrency.text,
+        int.parse(elementCost.text),
+        int.parse(elementCount.text),
+      ),
+    ]);
+  }
+
+  initCurrentInventory() {
+    currentInventory =
+        ObservableList.of(localeSqlManager.getTable("stock") ?? []);
   }
 
   bool validate() {
@@ -158,7 +172,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
           return AlertDialog(
             backgroundColor: ColorConsts.instance.secondary,
             content: AddElementInputs(
-              onPressed: () async {
+              onPressed: () {
                 editElement(index);
                 Navigator.pop(viewModelContext);
               },
@@ -169,26 +183,33 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   }
 
   @action
-  editElement(int index) async {
-    currentInventory[index] = InventoryElementModel(
-            name: elementName.text,
-            unit: elementUnit.text,
-            cost: int.parse(elementCost.text),
-            count: int.parse(elementCount.text),
-            currency: elementCurrency.text,
-            prefferedCount: currentInventory[index]["prefferedCount"])
-        .toJson();
-    await localeManager.removeData(LocaleKeysEnums.inventory.name);
-    await localeManager.setJsonData(
-        LocaleKeysEnums.inventory.name, currentInventory);
+  editElement(int index) {
+    try {
+      localeSqlManager.editValue(
+        whereParam: "name",
+        tableName: "stock",
+        comparedValue: currentInventory[index]["name"],
+        keys: sqlKeys,
+        values: [
+          elementName.text,
+          int.parse(elementCost.text),
+          elementUnit.text,
+          elementCurrency.text,
+          int.parse(elementCount.text),
+          1,
+        ],
+      );
+      initCurrentInventory();
+    } catch (_) {
+      showErrorDialog("Bir hata oluştu, tekrar deneyiniz.");
+    }
   }
 
   @action
   deleteElement(int index) async {
-    currentInventory.removeAt(index);
-    await localeManager.removeData(LocaleKeysEnums.inventory.name);
-    await localeManager.setJsonData(
-        LocaleKeysEnums.inventory.name, currentInventory);
+    localeSqlManager.deleteValue(
+        "stock", "name", currentInventory[index]["name"]);
+    initCurrentInventory();
   }
 
   @action

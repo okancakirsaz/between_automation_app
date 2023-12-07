@@ -13,6 +13,7 @@ abstract class _LandingViewModelBase with Store, BaseViewModel {
   @override
   Future<int> init() async {
     await localeManager.getSharedPreferencesInstance();
+    await localeSqlManager.initDb();
     //await localeManager.removeData(LocaleKeysEnums.mostPopularItems.name);
     //await localeManager.removeData(LocaleKeysEnums.inventory.name);
     return 1;
