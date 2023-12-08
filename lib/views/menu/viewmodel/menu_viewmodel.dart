@@ -1,10 +1,8 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
+import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:between_automation/core/consts/color_consts/color_consts.dart';
-import 'package:between_automation/core/init/cache/local_keys_enums.dart';
-import 'package:between_automation/views/menu/models/menu_item_model.dart';
 import 'package:between_automation/views/menu/view/components/add_menu_item.dart';
 import 'package:between_automation/views/stock/models/inventory_element_model.dart';
 import 'package:flutter/material.dart';
@@ -22,23 +20,20 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   void setContext(BuildContext context) => viewModelContext = context;
   @override
   void init() {
-    allInventory =
-        localeManager.getNullableJsonData(LocaleKeysEnums.inventory.name) ?? [];
-    menu = ObservableList.of(
-        localeManager.getNullableJsonData(LocaleKeysEnums.menu.name) ?? []);
-    convertModelToMenu();
+    getAllInventory();
+    getMenu();
     getInventoryDataAsItem();
   }
 
   @observable
   Uint8List? pickedPhoto;
   final PageController pageController = PageController();
+  final List<String> sqlKeys = ["name", "img", "materials", "price"];
   final TextEditingController materialCount = TextEditingController();
   final TextEditingController elementName = TextEditingController();
   final TextEditingController elementPrice = TextEditingController();
   final TextEditingController materialFromInventory = TextEditingController();
   late final List allInventory;
-  ObservableList<MenuItemModel> menuAsModel = ObservableList.of([]);
   @observable
   ObservableList menu = ObservableList.of([]);
   @observable
@@ -52,33 +47,35 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     }
   }
 
-  convertModelToMenu() {
-    menu.forEach(
-      (element) {
-        menuAsModel.add(MenuItemModel.fromJson(element));
-      },
-    );
+  getAllInventory() {
+    try {
+      allInventory = localeSqlManager.getTable("stock") ?? [];
+    } catch (e) {
+      debugPrint("error");
+    }
+  }
+
+  getMenu() {
+    menu = ObservableList.of(localeSqlManager.getTable("menu") ?? []);
   }
 
   getInventoryDataAsItem() {
-    for (int i = 0; i <= allInventory.length - 1; i++) {
+    for (var inventoryElement in allInventory) {
       final InventoryElementModel allInventoryAsModel =
-          InventoryElementModel.fromJson(allInventory[i]);
-      dropdownMenuItems.add(DropdownMenuEntry(
-          value: "${allInventoryAsModel.name}",
-          label: allInventoryAsModel.name!));
+          InventoryElementModel.fromJson(inventoryElement);
+      dropdownMenuItems.add(
+        DropdownMenuEntry(
+            value: "${allInventoryAsModel.name}",
+            label: allInventoryAsModel.name!),
+      );
     }
   }
 
   String findUnitForSelectedMaterial() {
     String response = "";
-    for (int i = 0; i <= allInventory.length - 1; i++) {
-      final InventoryElementModel allInventoryAsModel =
-          InventoryElementModel.fromJson(allInventory[i]);
-      if (materialFromInventory.text == allInventoryAsModel.name) {
-        response = allInventoryAsModel.unit!;
-      }
-    }
+    var inventoryElement = localeSqlManager.getStringValue(
+        "stock", "name", materialFromInventory.text);
+    response = inventoryElement[0]["unit"];
     return response;
   }
 
@@ -116,7 +113,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
     if (elementName.text == "" ||
         elementPrice.text == "" ||
         pickedPhoto == null ||
-        selectedMaterials == []) {
+        selectedMaterials.isEmpty) {
       return false;
     } else {
       return true;
@@ -125,19 +122,17 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
 
   Future<void> getFinalValues() async {
     if (addElementValidation()) {
-      menu.add(MenuItemModel(
-        name: elementName.text,
-        price: int.parse(elementPrice.text),
-        img: pickedPhoto,
-        materials: selectedMaterials.toList(),
-      ).toJson());
-      menuAsModel.add(MenuItemModel(
-        name: elementName.text,
-        price: int.parse(elementPrice.text),
-        img: pickedPhoto,
-        materials: selectedMaterials.toList(),
-      ));
-      await localeManager.setJsonData(LocaleKeysEnums.menu.name, menu);
+      localeSqlManager.setValue(
+        tableName: "menu",
+        keys: sqlKeys,
+        values: [
+          elementName.text,
+          pickedPhoto?.toList(),
+          jsonEncode(selectedMaterials.toList()),
+          int.parse(elementPrice.text),
+        ],
+      );
+      getMenu();
       resetInputs();
     } else {
       showErrorDialog("Eksik bilgi girdiniz, tekrar deneyiniz.");
@@ -160,7 +155,7 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
               viewModel: viewModel,
               onPressed: () async {
                 Navigator.pop(context);
-                await setEditedValues(index);
+                setEditedValues(index);
               }),
         ),
       ),
@@ -168,21 +163,27 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   }
 
   @action
-  Future<void> setEditedValues(int index) async {
-    menu[index]["name"] = elementName.text;
-    menu[index]["price"] = int.parse(elementPrice.text);
-    menu[index]["img"] = pickedPhoto;
-    menu[index]["materials"] = selectedMaterials.toList();
-
-    menuAsModel[index] = MenuItemModel.fromJson(menu[index]);
-    await localeManager.setJsonData(LocaleKeysEnums.menu.name, menu);
+  setEditedValues(int index) {
+    localeSqlManager.editValue(
+      tableName: "menu",
+      comparedValue: menu[index]["name"],
+      keys: sqlKeys,
+      whereParam: "name",
+      values: [
+        elementName.text,
+        pickedPhoto,
+        jsonEncode(selectedMaterials.toList()),
+        int.parse(elementPrice.text),
+      ],
+    );
+    getMenu();
   }
 
   dominateInputsForEdit(int index) {
-    elementName.text = menuAsModel[index].name!;
-    elementPrice.text = menuAsModel[index].price!.toString();
-    pickedPhoto = Uint8List.fromList(menuAsModel[index].img!);
-    selectedMaterials = ObservableList.of(menuAsModel[index].materials!);
+    elementName.text = menu[index]["name"]!;
+    elementPrice.text = menu[index]["price"]!.toString();
+    pickedPhoto = Uint8List.fromList(menu[index]["img"]!);
+    selectedMaterials = ObservableList.of(jsonDecode(menu[index]["materials"]));
   }
 
   edit(int index, MenuViewModel viewModel) {
@@ -192,14 +193,14 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
 
   @action
   Future<void> deleteFromMenu(int index) async {
-    menu.removeAt(index);
-    menuAsModel.removeAt(index);
-    await localeManager.setJsonData(LocaleKeysEnums.menu.name, menu);
+    localeSqlManager.deleteValue("menu", "name", menu[index]["name"]);
+    getMenu();
   }
 
   List<String> fetchMaterialsForUi(int index) {
     List<String> finalResponse = [];
-    menuAsModel[index].materials!.forEach((element) {
+    List materials = jsonDecode(menu[index]["materials"]);
+    materials.forEach((element) {
       InventoryElementModel elementAsModel =
           InventoryElementModel.fromJson(element);
       finalResponse.add(

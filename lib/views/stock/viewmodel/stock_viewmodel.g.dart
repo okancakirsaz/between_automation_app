@@ -33,30 +33,40 @@ mixin _$StockViewModel on _StockViewModelBase, Store {
     return _$fetchInventoryAsyncAction.run(() => super.fetchInventory());
   }
 
-  late final _$editElementAsyncAction =
-      AsyncAction('_StockViewModelBase.editElement', context: context);
+  late final _$_StockViewModelBaseActionController =
+      ActionController(name: '_StockViewModelBase', context: context);
 
   @override
-  Future editElement(int index) {
-    return _$editElementAsyncAction.run(() => super.editElement(index));
+  dynamic editElement(int index) {
+    final _$actionInfo = _$_StockViewModelBaseActionController.startAction(
+        name: '_StockViewModelBase.editElement');
+    try {
+      return super.editElement(index);
+    } finally {
+      _$_StockViewModelBaseActionController.endAction(_$actionInfo);
+    }
   }
 
-  late final _$deleteElementAsyncAction =
-      AsyncAction('_StockViewModelBase.deleteElement', context: context);
-
   @override
-  Future deleteElement(int index) {
-    return _$deleteElementAsyncAction.run(() => super.deleteElement(index));
+  dynamic deleteElement(int index) {
+    final _$actionInfo = _$_StockViewModelBaseActionController.startAction(
+        name: '_StockViewModelBase.deleteElement');
+    try {
+      return super.deleteElement(index);
+    } finally {
+      _$_StockViewModelBaseActionController.endAction(_$actionInfo);
+    }
   }
 
-  late final _$checkIsInventoryElementExistAsyncAction = AsyncAction(
-      '_StockViewModelBase.checkIsInventoryElementExist',
-      context: context);
-
   @override
-  Future<void> checkIsInventoryElementExist() {
-    return _$checkIsInventoryElementExistAsyncAction
-        .run(() => super.checkIsInventoryElementExist());
+  dynamic checkIsInventoryElementExist() {
+    final _$actionInfo = _$_StockViewModelBaseActionController.startAction(
+        name: '_StockViewModelBase.checkIsInventoryElementExist');
+    try {
+      return super.checkIsInventoryElementExist();
+    } finally {
+      _$_StockViewModelBaseActionController.endAction(_$actionInfo);
+    }
   }
 
   @override

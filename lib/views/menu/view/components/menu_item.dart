@@ -1,4 +1,3 @@
-import 'package:between_automation/views/menu/models/menu_item_model.dart';
 import 'package:between_automation/views/menu/viewmodel/menu_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,7 @@ import '../../../../core/consts/text_consts.dart';
 class MenuItem extends StatelessWidget {
   final MenuViewModel viewModel;
   final int index;
-  final MenuItemModel data;
+  final Map<String, dynamic> data;
   const MenuItem(
       {super.key,
       required this.data,
@@ -36,13 +35,13 @@ class MenuItem extends StatelessWidget {
               image: DecorationImage(
                 fit: BoxFit.cover,
                 image: MemoryImage(
-                  Uint8List.fromList(data.img!),
+                  Uint8List.fromList(data["img"]),
                 ),
               ),
             ),
           ),
           Text(
-            data.name!,
+            data["name"],
             style: TextConsts.instance.regularWhite25Bold,
             textAlign: TextAlign.center,
           ),
@@ -51,7 +50,7 @@ class MenuItem extends StatelessWidget {
             child: SizedBox(
               width: 600,
               child: Text(
-                "Ücret: ${data.price!}₺",
+                "Ücret: ${data["price"]}₺",
                 style: TextConsts.instance.regularWhite20,
                 textAlign: TextAlign.left,
               ),

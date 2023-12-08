@@ -65,14 +65,6 @@ mixin _$MenuViewModel on _MenuViewModelBase, Store {
     return _$getImageAsyncAction.run(() => super.getImage());
   }
 
-  late final _$setEditedValuesAsyncAction =
-      AsyncAction('_MenuViewModelBase.setEditedValues', context: context);
-
-  @override
-  Future<void> setEditedValues(int index) {
-    return _$setEditedValuesAsyncAction.run(() => super.setEditedValues(index));
-  }
-
   late final _$deleteFromMenuAsyncAction =
       AsyncAction('_MenuViewModelBase.deleteFromMenu', context: context);
 
@@ -101,6 +93,17 @@ mixin _$MenuViewModel on _MenuViewModelBase, Store {
         name: '_MenuViewModelBase.deleteMaterial');
     try {
       return super.deleteMaterial(index);
+    } finally {
+      _$_MenuViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  dynamic setEditedValues(int index) {
+    final _$actionInfo = _$_MenuViewModelBaseActionController.startAction(
+        name: '_MenuViewModelBase.setEditedValues');
+    try {
+      return super.setEditedValues(index);
     } finally {
       _$_MenuViewModelBaseActionController.endAction(_$actionInfo);
     }
