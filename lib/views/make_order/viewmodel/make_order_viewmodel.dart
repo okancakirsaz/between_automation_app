@@ -104,8 +104,8 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   int getTotalCost() {
     List<int> costList = [];
     for (var selectedElement in selectedFoods) {
-      final List menuElement =
-          localeSqlManager.getValue("menu", "name", selectedElement["name"]);
+      final List menuElement = localeSqlManager.getStringValue(
+          "menu", "name", selectedElement["name"]);
       if (selectedElement["name"] == menuElement[0]["name"]) {
         costList.add(menuElement[0]["price"] * selectedElement["count"]);
       }
@@ -126,13 +126,13 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
      */
     for (Map<String, dynamic> selectedFood in selectedFoods) {
       final List menuElement =
-          localeSqlManager.getValue("menu", "name", selectedFood["name"]);
+          localeSqlManager.getStringValue("menu", "name", selectedFood["name"]);
       final List<dynamic> menuElementMaterials =
           jsonDecode(menuElement[0]["materials"]);
       for (Map<String, dynamic> menuElementMaterial in menuElementMaterials) {
-        final List stockData = localeSqlManager.getValue(
+        final List stockData = localeSqlManager.getStringValue(
             "stock", "name", menuElementMaterial["name"]);
-        if (selectedFood["count"] < stockData[0]["count"]) {
+        if (selectedFood["count"] <= stockData[0]["count"]) {
           localeSqlManager.editValue(
               tableName: "stock",
               comparedValue: menuElementMaterial["name"],
@@ -257,16 +257,16 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
     isInventoryEmpty();
 
     final List menuElement =
-        localeSqlManager.getValue("menu", "name", element["name"]);
+        localeSqlManager.getStringValue("menu", "name", element["name"]);
     final List<dynamic> menuElementMaterials =
         jsonDecode(menuElement[0]["materials"]);
     for (Map<String, dynamic> menuElementMaterial in menuElementMaterials) {
-      final List stockData = localeSqlManager.getValue(
+      final List stockData = localeSqlManager.getStringValue(
           "stock", "name", menuElementMaterial["name"]);
       if (element["count"] >= stockData[0]["count"]) {
         showErrorDialog("Yeterli stok bulunmamakta");
       }
-      if (element["count"] < stockData[0]["count"] && isDecrament) {
+      if (element["count"] <= stockData[0]["count"] && isDecrament) {
         localeSqlManager.editValue(
             tableName: "stock",
             comparedValue: menuElementMaterial["name"],

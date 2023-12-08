@@ -70,9 +70,15 @@ class LocaleSqlManager {
     _instance.execute("DELETE FROM '$tableName' WHERE $key='$comparedValue'");
   }
 
-  getValue(String tableName, String columnName, String value) {
+  getStringValue(String tableName, String columnName, String value) {
     final query = _instance
         .select("SELECT * FROM $tableName WHERE $columnName = '$value'");
+    return query.toList();
+  }
+
+  getDynamicValue(String tableName, String columnName, dynamic value) {
+    final query =
+        _instance.select("SELECT * FROM $tableName WHERE $columnName = $value");
     return query.toList();
   }
 }

@@ -1,8 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:between_automation/core/consts/color_consts/color_consts.dart';
-import 'package:between_automation/core/init/cache/local_keys_enums.dart';
-import 'package:between_automation/views/stock/models/inventory_element_model.dart';
 import 'package:between_automation/views/stock/view/stock_view.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
@@ -21,11 +19,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   @override
   Future<void> init() async {
     initCurrentInventory();
-    mostPopulars = localeManager
-            .getNullableJsonData(LocaleKeysEnums.mostPopularItems.name) ??
-        [];
     await checkIsInventoryElementExist();
-    await fetchMostPopulars();
   }
 
   @observable
@@ -70,13 +64,7 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
       elementUnit.text,
       elementCurrency.text,
       int.parse(elementCount.text),
-      checkPrefferedCount(
-        elementName.text,
-        elementUnit.text,
-        elementCurrency.text,
-        int.parse(elementCost.text),
-        int.parse(elementCount.text),
-      ),
+      0
     ]);
   }
 
@@ -95,53 +83,6 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
     } else {
       return true;
     }
-  }
-
-  int checkPrefferedCount(String elementName, String elementUnit,
-      String elementCurrency, int elementCost, int elementCount) {
-    //TODO: optimize
-    int finalValue = 0;
-    for (int i = 0; i <= currentInventory.length - 1; i++) {
-      final InventoryElementModel asModel =
-          InventoryElementModel.fromJson(currentInventory[i]);
-      if (elementName == asModel.name &&
-          elementUnit == asModel.unit &&
-          elementCost == asModel.cost &&
-          elementCurrency == asModel.currency &&
-          elementCount == asModel.count) {
-        finalValue = asModel.prefferedCount! + 1;
-      }
-    }
-    return finalValue;
-  }
-
-  fetchMostPopulars() async {
-    //TODO: optimize
-    for (int i = 0; i <= currentInventory.length - 1; i++) {
-      final InventoryElementModel asModel =
-          InventoryElementModel.fromJson(currentInventory[i]);
-
-      if (asModel.prefferedCount! == 2) {
-        if (!mostPopulars
-            .any((element) => deepEquals(element, asModel.toJson()))) {
-          mostPopulars.add(asModel.toJson());
-        }
-        await localeManager.setJsonData(
-            LocaleKeysEnums.mostPopularItems.name, mostPopulars);
-      }
-    }
-  }
-
-  bool deepEquals(Map<String, dynamic> map1, Map<String, dynamic> map2) {
-    if (map1.length != map2.length) return false;
-
-    for (var key in map1.keys) {
-      if (!map2.containsKey(key) || map1[key] != map2[key]) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   resetAllControllers() {
@@ -213,16 +154,14 @@ abstract class _StockViewModelBase with Store, BaseViewModel {
   }
 
   @action
-  Future<void> checkIsInventoryElementExist() async {
-    //TODO: optimize
-    for (int i = 0; i <= currentInventory.length - 1; i++) {
-      InventoryElementModel elementAsModel =
-          InventoryElementModel.fromJson(currentInventory[i]);
-      if (elementAsModel.count! <= 0) {
-        currentInventory.removeAt(i);
-        await localeManager.setJsonData(
-            LocaleKeysEnums.inventory.name, currentInventory);
-      }
+  checkIsInventoryElementExist() {
+    try {
+      List finishedStocks =
+          localeSqlManager.getDynamicValue("stock", "count", 0);
+      localeSqlManager.deleteValue("stock", "name", finishedStocks[0]["name"]);
+      initCurrentInventory();
+    } catch (e) {
+      //Inventory is empty
     }
   }
 

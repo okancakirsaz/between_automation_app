@@ -60,7 +60,6 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   }
 
   getInventoryDataAsItem() {
-    //TODO: optimize
     for (var inventoryElement in allInventory) {
       final InventoryElementModel allInventoryAsModel =
           InventoryElementModel.fromJson(inventoryElement);
@@ -73,15 +72,10 @@ abstract class _MenuViewModelBase with Store, BaseViewModel {
   }
 
   String findUnitForSelectedMaterial() {
-    //TODO: optimize
     String response = "";
-    for (var inventoryElement in allInventory) {
-      final InventoryElementModel allInventoryAsModel =
-          InventoryElementModel.fromJson(inventoryElement);
-      if (materialFromInventory.text == allInventoryAsModel.name) {
-        response = allInventoryAsModel.unit!;
-      }
-    }
+    var inventoryElement = localeSqlManager.getStringValue(
+        "stock", "name", materialFromInventory.text);
+    response = inventoryElement[0]["unit"];
     return response;
   }
 
