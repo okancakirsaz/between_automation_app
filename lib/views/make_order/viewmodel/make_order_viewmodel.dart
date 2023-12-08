@@ -37,6 +37,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   final PageController pageController = PageController();
   @observable
   ObservableList selectedFoods = ObservableList.of([]);
+  List acceptedSelectedFoods = [];
   @observable
   ObservableList orders = ObservableList.of([]);
   bool _isStockEnought = false;
@@ -72,10 +73,15 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
   @action
   addSelectFood() {
-    selectedFoods.add({
-      "name": selectedFood.text,
-      "count": int.parse(selectedFoodCount.text)
-    });
+    checkSelectedFoodItemStockIsEnought();
+    if (_isStockEnought) {
+      selectedFoods.add({
+        "name": selectedFood.text,
+        "count": int.parse(selectedFoodCount.text)
+      });
+    } else {
+      showErrorDialog("Yeterli stok bulunmamakta.");
+    }
   }
 
   @action
@@ -87,17 +93,29 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
     if (selectedFoods.isNotEmpty) {
       manipulateStockDatas();
 
-      if (_isStockEnought) {
-        orders.add({
-          "order": selectedFoods,
-          "note": note.text,
-          "cost": getTotalCost()
-        });
-        await sendJsonToCache(LocaleKeysEnums.orders, orders);
-        resetInputs();
-      }
+      orders.add(
+          {"order": selectedFoods, "note": note.text, "cost": getTotalCost()});
+      await sendJsonToCache(LocaleKeysEnums.orders, orders);
+      resetInputs();
     } else {
       showErrorDialog("Lütfen önce sipariş giriniz.");
+    }
+  }
+
+  checkSelectedFoodItemStockIsEnought() {
+    List menuElement =
+        localeSqlManager.getStringValue("menu", "name", selectedFood.text);
+    List<dynamic> menuMaterials = jsonDecode(menuElement[0]["materials"]);
+    for (Map<String, dynamic> menuMaterial in menuMaterials) {
+      final List stockData = localeSqlManager.getStringValue(
+          "stock", "name", menuMaterial["name"]);
+
+      if (menuMaterial["count"] * int.parse(selectedFoodCount.text) >
+          stockData[0]["count"]) {
+        _isStockEnought = false;
+      } else {
+        _isStockEnought = true;
+      }
     }
   }
 
@@ -116,14 +134,6 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
   manipulateStockDatas() {
     isInventoryEmpty();
-    /*
-    First looking selectedFoods data or comed data with params
-    Second getting who menu material equal selectedFood data
-    After than getting stock datas in the menu material
-    Last job is check the stock is enought
-    Is true manupilate stock data
-    Else quit.
-     */
     for (Map<String, dynamic> selectedFood in selectedFoods) {
       final List menuElement =
           localeSqlManager.getStringValue("menu", "name", selectedFood["name"]);
@@ -132,22 +142,30 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
       for (Map<String, dynamic> menuElementMaterial in menuElementMaterials) {
         final List stockData = localeSqlManager.getStringValue(
             "stock", "name", menuElementMaterial["name"]);
-        if (selectedFood["count"] <= stockData[0]["count"]) {
-          localeSqlManager.editValue(
-              tableName: "stock",
-              comparedValue: menuElementMaterial["name"],
-              keys: ["count"],
-              whereParam: "name",
-              values: [
-                stockData[0]["count"] -
-                    (selectedFood["count"] * menuElementMaterial["count"])
-              ]);
-          _isStockEnought = true;
-        } else {
-          showErrorDialog("Yeterli stok bulunmamakta");
+        if ((selectedFood["count"] * menuElementMaterial["count"]) <=
+            stockData[0]["count"]) {
+          setNewStocksToDatabases(
+              menuElementMaterial, stockData, selectedFood, true);
         }
       }
     }
+  }
+
+  setNewStocksToDatabases(Map<String, dynamic> menuElementMaterial,
+      List stockData, dynamic selectedFood, bool isDecrament) {
+    localeSqlManager.editValue(
+      tableName: "stock",
+      comparedValue: menuElementMaterial["name"],
+      keys: ["count"],
+      whereParam: "name",
+      values: [
+        isDecrament
+            ? stockData[0]["count"] -
+                (selectedFood["count"] * menuElementMaterial["count"])
+            : stockData[0]["count"] +
+                (selectedFood["count"] * menuElementMaterial["count"])
+      ],
+    );
   }
 
   @action
@@ -223,6 +241,8 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
       if (_isStockEnought) {
         await sendJsonToCache(LocaleKeysEnums.orders, orders);
         getOrders();
+      } else {
+        showErrorDialog("Yeterli stok bulunmamakta");
       }
     }
   }
@@ -267,29 +287,15 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
       final List stockData = localeSqlManager.getStringValue(
           "stock", "name", menuElementMaterial["name"]);
       if (element["count"] >= stockData[0]["count"]) {
-        showErrorDialog("Yeterli stok bulunmamakta");
+        _isStockEnought = false;
       }
-      if (element["count"] <= stockData[0]["count"] && isDecrament) {
-        localeSqlManager.editValue(
-            tableName: "stock",
-            comparedValue: menuElementMaterial["name"],
-            keys: ["count"],
-            whereParam: "name",
-            values: [
-              stockData[0]["count"] -
-                  (element["count"] * menuElementMaterial["count"])
-            ]);
+      if ((element["count"] * menuElementMaterial["count"]) <=
+              stockData[0]["count"] &&
+          isDecrament) {
+        setNewStocksToDatabases(menuElementMaterial, stockData, element, true);
         _isStockEnought = true;
       } else if (!isDecrament) {
-        localeSqlManager.editValue(
-            tableName: "stock",
-            comparedValue: menuElementMaterial["name"],
-            keys: ["count"],
-            whereParam: "name",
-            values: [
-              stockData[0]["count"] +
-                  (element["count"] * menuElementMaterial["count"])
-            ]);
+        setNewStocksToDatabases(menuElementMaterial, stockData, element, false);
         _isStockEnought = true;
       }
     }

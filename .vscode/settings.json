@@ -1,0 +1,10 @@
+{
+    "dartImport.fixOnSave": true,
+    "editor.maxTokenizationLineLength": 20000,
+    "diffEditor.renderSideBySideInlineBreakpoint": 900,
+    "notebook.output.textLineLimit": 30,
+    "html.format.wrapLineLength": 120,
+    "editor.wordWrapColumn": 80,
+    "editor.wordWrap": "off",
+    "editor.minimap.maxColumn": 120
+}
