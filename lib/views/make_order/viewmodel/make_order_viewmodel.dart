@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
+import 'dart:convert';
+
 import 'package:between_automation/core/consts/color_consts/color_consts.dart';
 import 'package:between_automation/core/init/cache/local_keys_enums.dart';
 import 'package:between_automation/views/make_order/view/make_order_view.dart';
@@ -47,7 +49,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   getAllMenu() {
-    allMenu = localeManager.getNullableJsonData(LocaleKeysEnums.menu.name);
+    allMenu = localeSqlManager.getTable("menu") ?? [];
   }
 
   getOrders() {
@@ -56,8 +58,7 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   getAllInventory() {
-    allInventory =
-        localeManager.getNullableJsonData(LocaleKeysEnums.inventory.name) ?? [];
+    allInventory = localeSqlManager.getTable("stock") ?? [];
   }
 
   fetchMenuAsDropdownEntry() {
@@ -93,7 +94,6 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
           "cost": getTotalCost()
         });
         await sendJsonToCache(LocaleKeysEnums.orders, orders);
-        await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
         resetInputs();
       }
     } else {
@@ -102,45 +102,48 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   int getTotalCost() {
-    //TODO: optimize
     List<int> costList = [];
-    for (var element in allMenu) {
-      for (var selectedElement in selectedFoods) {
-        if (selectedElement["name"] == element["name"]) {
-          costList.add(element["price"] * selectedElement["count"]);
-        }
+    for (var selectedElement in selectedFoods) {
+      final List menuElement =
+          localeSqlManager.getValue("menu", "name", selectedElement["name"]);
+      if (selectedElement["name"] == menuElement[0]["name"]) {
+        costList.add(menuElement[0]["price"] * selectedElement["count"]);
       }
     }
+
     return costList.reduce((a, b) => a + b);
   }
 
   manipulateStockDatas() {
-    //TODO: optimize
     isInventoryEmpty();
-    for (var menuElement in allMenu) {
-      MenuItemModel.fromJson(menuElement).materials!.forEach((material) {
-        selectedFoods.where((selectedFoodName) {
-          if (selectedFoodName["name"] == menuElement["name"]) {
-            allInventory.where((inventoryElement) {
-              int finalValue = (material["count"] * selectedFoodName["count"]);
-              if (material["name"] == inventoryElement["name"]) {
-                if (inventoryElement["count"] < finalValue) {
-                  showErrorDialog(
-                    "Yeterli stok bulunmamakta",
-                  );
-                } else {
-                  inventoryElement["count"] =
-                      inventoryElement["count"] - finalValue;
-                  _isStockEnought = true;
-                }
-              }
-
-              return true;
-            }).toList();
-          }
-          return true;
-        }).toList();
-      });
+    /*
+    First looking selectedFoods data or comed data with params
+    Second getting who menu material equal selectedFood data
+    After than getting stock datas in the menu material
+    Last job is check the stock is enought
+    Is true manupilate stock data
+    Else quit.
+     */
+    for (Map<String, dynamic> selectedFood in selectedFoods) {
+      final List menuElement =
+          localeSqlManager.getValue("menu", "name", selectedFood["name"]);
+      final List<dynamic> menuElementMaterials =
+          jsonDecode(menuElement[0]["materials"]);
+      for (Map<String, dynamic> menuElementMaterial in menuElementMaterials) {
+        final List stockData = localeSqlManager.getValue(
+            "stock", "name", menuElementMaterial["name"]);
+        if (selectedFood["count"] < stockData[0]["count"]) {
+          localeSqlManager.editValue(
+              tableName: "stock",
+              comparedValue: menuElementMaterial["name"],
+              keys: ["count"],
+              whereParam: "name",
+              values: [stockData[0]["count"] - selectedFood["count"]]);
+          _isStockEnought = true;
+        } else {
+          showErrorDialog("Yeterli stok bulunmamakta");
+        }
+      }
     }
   }
 
@@ -175,7 +178,6 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
 
     orders.removeAt(index);
     await sendJsonToCache(LocaleKeysEnums.orders, orders);
-    await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
   }
 
   editOrder(MakeOrderViewModel viewModel, int index) {
@@ -215,7 +217,6 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
     orders[index]["cost"] = getTotalCost();
     orders[index]["order"] = selectedFoods;
     if (selectedFoods.isNotEmpty) {
-      await sendJsonToCache(LocaleKeysEnums.inventory, allInventory);
       if (_isStockEnought) {
         await sendJsonToCache(LocaleKeysEnums.orders, orders);
         getOrders();
@@ -253,31 +254,35 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
   }
 
   manipulateStockDatasForAddOrDelete(dynamic element, bool isDecrament) {
-    //TODO: optimize
     isInventoryEmpty();
-    for (var menuElement in allMenu) {
-      MenuItemModel.fromJson(menuElement).materials!.forEach((material) {
-        if (element["name"] == menuElement["name"]) {
-          allInventory.where((inventoryElement) {
-            int finalValue = (material["count"] * element["count"]);
-            if (material["name"] == inventoryElement["name"]) {
-              if (inventoryElement["count"] < finalValue) {
-                showErrorDialog(
-                  "Yeterli stok bulunmamakta",
-                );
-              } else {
-                inventoryElement["count"] = isDecrament
-                    ? inventoryElement["count"] -
-                        (material["count"] * element["count"])
-                    : inventoryElement["count"] +
-                        (material["count"] * element["count"]);
-                _isStockEnought = true;
-              }
-            }
-            return true;
-          }).toList();
-        }
-      });
+
+    final List menuElement =
+        localeSqlManager.getValue("menu", "name", element["name"]);
+    final List<dynamic> menuElementMaterials =
+        jsonDecode(menuElement[0]["materials"]);
+    for (Map<String, dynamic> menuElementMaterial in menuElementMaterials) {
+      final List stockData = localeSqlManager.getValue(
+          "stock", "name", menuElementMaterial["name"]);
+      if (element["count"] >= stockData[0]["count"]) {
+        showErrorDialog("Yeterli stok bulunmamakta");
+      }
+      if (element["count"] < stockData[0]["count"] && isDecrament) {
+        localeSqlManager.editValue(
+            tableName: "stock",
+            comparedValue: menuElementMaterial["name"],
+            keys: ["count"],
+            whereParam: "name",
+            values: [stockData[0]["count"] - element["count"]]);
+        _isStockEnought = true;
+      } else if (!isDecrament) {
+        localeSqlManager.editValue(
+            tableName: "stock",
+            comparedValue: menuElementMaterial["name"],
+            keys: ["count"],
+            whereParam: "name",
+            values: [stockData[0]["count"] + element["count"]]);
+        _isStockEnought = true;
+      }
     }
   }
 
