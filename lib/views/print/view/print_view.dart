@@ -27,6 +27,7 @@ class PrintView extends StatelessWidget {
               Expanded(
                 child: PdfPreview(
                     maxPageWidth: 650,
+                    initialPageFormat: PdfPageFormat(58, model.pageHeight),
                     loadingWidget: const CircularProgressIndicator(),
                     useActions: true,
                     pdfFileName: "${model.getCurrentDate()}/Adisyon Fişi",
@@ -41,7 +42,6 @@ class PrintView extends StatelessWidget {
                     canChangePageFormat: false,
                     canChangeOrientation: false,
                     dpi: 400,
-                    initialPageFormat: PdfPageFormat.roll80,
                     build: (format) {
                       return model.fetchPdf(format);
                     }),
