@@ -138,7 +138,10 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
               comparedValue: menuElementMaterial["name"],
               keys: ["count"],
               whereParam: "name",
-              values: [stockData[0]["count"] - selectedFood["count"]]);
+              values: [
+                stockData[0]["count"] -
+                    (selectedFood["count"] * menuElementMaterial["count"])
+              ]);
           _isStockEnought = true;
         } else {
           showErrorDialog("Yeterli stok bulunmamakta");
@@ -272,7 +275,10 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
             comparedValue: menuElementMaterial["name"],
             keys: ["count"],
             whereParam: "name",
-            values: [stockData[0]["count"] - element["count"]]);
+            values: [
+              stockData[0]["count"] -
+                  (element["count"] * menuElementMaterial["count"])
+            ]);
         _isStockEnought = true;
       } else if (!isDecrament) {
         localeSqlManager.editValue(
@@ -280,7 +286,10 @@ abstract class MakeOrderViewModelBase with Store, BaseViewModel {
             comparedValue: menuElementMaterial["name"],
             keys: ["count"],
             whereParam: "name",
-            values: [stockData[0]["count"] + element["count"]]);
+            values: [
+              stockData[0]["count"] +
+                  (element["count"] * menuElementMaterial["count"])
+            ]);
         _isStockEnought = true;
       }
     }
