@@ -28,14 +28,14 @@ abstract class _PrintViewModelBase with Store, BaseViewModel {
 
   late final pw.Font font;
   //Initalizing in getFont() function
-  late final pw.TextStyle pdfRegularBlack18;
+  late final pw.TextStyle pdfRegularBlack10;
 
-  pw.TextStyle pdfRegularBlack25 = pw.TextStyle(
-      fontSize: 5, color: PdfColors.black, fontWeight: pw.FontWeight.bold);
+  pw.TextStyle pdfRegularBlack20 = pw.TextStyle(
+      fontSize: 20, color: PdfColors.black, fontWeight: pw.FontWeight.bold);
   Map<String, dynamic> data = {};
 
   List<int> pricesList = [];
-  double pageHeight = 90;
+  double pageHeight = 200;
   late List menu;
 
   getAllMenu() {
@@ -44,9 +44,9 @@ abstract class _PrintViewModelBase with Store, BaseViewModel {
 
   Future<void> getFont() async {
     font = await PdfGoogleFonts.courierPrimeBold();
-    pdfRegularBlack18 = pw.TextStyle(
+    pdfRegularBlack10 = pw.TextStyle(
         font: font,
-        fontSize: 2.2,
+        fontSize: 10,
         color: PdfColors.black,
         fontWeight: pw.FontWeight.bold);
   }
@@ -92,29 +92,29 @@ abstract class _PrintViewModelBase with Store, BaseViewModel {
           padding: const pw.EdgeInsets.only(top: 7),
           child: pw.Text(
             "Adisyon",
-            style: pdfRegularBlack25,
+            style: pdfRegularBlack20,
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.only(top: 7),
           child: pw.Text(
             "Between",
-            style: pdfRegularBlack18,
+            style: pdfRegularBlack10,
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.only(top: 7),
           child: pw.Text(
             "Tarih: ${getCurrentDate()}",
-            style: pdfRegularBlack18,
+            style: pdfRegularBlack10,
           ),
         ),
         pw.Container(
-          padding: const pw.EdgeInsets.all(0.5),
-          margin: const pw.EdgeInsets.all(2),
+          padding: const pw.EdgeInsets.all(5),
+          margin: const pw.EdgeInsets.all(5),
           decoration: pw.BoxDecoration(
-            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(0.5)),
-            border: pw.Border.all(color: PdfColors.black, width: 0.2),
+            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
+            border: pw.Border.all(color: PdfColors.black, width: 1),
           ),
           child: pw.ListView.builder(
               itemCount: data["order"].length,
@@ -122,6 +122,7 @@ abstract class _PrintViewModelBase with Store, BaseViewModel {
                 return pw.Container(
                   width: double.infinity,
                   height: 5,
+                  margin: const pw.EdgeInsets.all(5),
                   decoration: pw.BoxDecoration(
                       borderRadius:
                           const pw.BorderRadius.all(pw.Radius.circular(10)),
@@ -131,21 +132,21 @@ abstract class _PrintViewModelBase with Store, BaseViewModel {
                       children: [
                         pw.Text(
                           "${data["order"][index]["name"]} / ${pricesList[index]}TL",
-                          style: pdfRegularBlack18,
+                          style: pdfRegularBlack10,
                         ),
                         pw.Text("x${data["order"][index]["count"]}",
-                            style: pdfRegularBlack18),
+                            style: pdfRegularBlack10),
                       ]),
                 );
               }),
         ),
         pw.Container(
-            margin: const pw.EdgeInsets.symmetric(horizontal: 2),
+            margin: const pw.EdgeInsets.symmetric(horizontal: 5),
             width: double.infinity,
             child: pw.Text(
               "Toplam:${data["cost"]}TL",
               textAlign: pw.TextAlign.right,
-              style: pdfRegularBlack18,
+              style: pdfRegularBlack10,
             )),
         pw.SizedBox(height: 10)
       ],
@@ -154,8 +155,8 @@ abstract class _PrintViewModelBase with Store, BaseViewModel {
 
   calculatePaperHeight() {
     pageHeight = data["order"].length * 10.1;
-    if (pageHeight <= 90) {
-      pageHeight += 90;
+    if (pageHeight <= 200) {
+      pageHeight += 200;
     }
   }
 }
